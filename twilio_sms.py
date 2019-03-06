@@ -6,11 +6,11 @@ A script to call the Twilio API for sending text messages
 import re
 import os
 import sys
+import logging
 import argparse
 
 # Download the helper library from https://www.twilio.com/docs/python/install
 from twilio.rest import Client
-
 
 def confirm():
     """
@@ -36,6 +36,9 @@ def main(args):
     auth_token = '######################'
     client = Client(account_sid, auth_token)
     phone_list = []
+    logging.basicConfig(filename='twilio_sms.log', filemode='a',\
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',\
+            datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
     cli = argparse.ArgumentParser(description="Send an SMS text using the Twilio API")
     cli.add_argument('-l', '--list', help="The phone number list can be a file (one per line) \
@@ -43,12 +46,16 @@ def main(args):
             phone numbers themselves cannot have spaces).")
     cli.add_argument('-b', '--body', help="The body of the message you want to send in quotes. \
             Max 160 characters.")
-    #160_chars="---------------------------------------------------------------------------------------------------------------------------------------------------------------"
     opts = cli.parse_args(args)
 
     if len(sys.argv) == 1:
         cli.print_help()
         exit()
+
+    if len(opts.body) > 160:
+        print("\nYour message is {0} characters, the max is 160, please fix.\
+                \nExiting.".format(len(opts.body)))
+        exit(2)
 
     if os.path.isfile(opts.list):
         with open(opts.list) as phone_file:
@@ -80,8 +87,11 @@ def main(args):
                 from_='+1##########', # your twilio number - this costs about $1/month
                 to='+1'+phone_num     # +1 is the USA country code
             )
-        print("phone_num = {0} ; body = \"{1}\" ; {2}".format(phone_num, opts.body, message.sid))
+        logging.info("phone_num = %s ; body = \"%s\" ; %s", phone_num, opts.body, message.sid)
+        #print("phone_num = {0} ; body = \"{1}\" ; {2}".format(phone_num, opts.body, message.sid))
         #exit()
+
+    print("\nDone.")
 
 if __name__ == '__main__':
     main(sys.argv[1:])
