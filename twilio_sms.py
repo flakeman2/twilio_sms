@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-A script to call the Twilio api for sending text messages
+A script to call the Twilio API for sending text messages
 """
 
 import re
@@ -10,6 +10,22 @@ import argparse
 
 # Download the helper library from https://www.twilio.com/docs/python/install
 from twilio.rest import Client
+
+
+def confirm():
+    """
+    Ask user to enter Y or N (case-insensitive).
+    :return: True if the answer is Y.
+    :rtype: bool
+    """
+
+    answer = ""
+    while answer not in ["y", "n"]:
+        answer = input("\nAre you sure you want to send the SMS message(s)? [Y/n] ").lower()
+
+    if answer == "n":
+        exit("Exiting.")
+    return True
 
 def main(args):
     """
@@ -21,7 +37,7 @@ def main(args):
     client = Client(account_sid, auth_token)
     phone_list = []
 
-    cli = argparse.ArgumentParser(description="Send an SMS text")
+    cli = argparse.ArgumentParser(description="Send an SMS text using the Twilio API")
     cli.add_argument('-l', '--list', help="The phone number list can be a file (one per line) \
             or a list of phone numbers in quotes (must be space delimited, \
             phone numbers themselves cannot have spaces).")
@@ -52,15 +68,7 @@ def main(args):
     #print(phone_list)
     #exit()
 
-    #answer = ""
-    #while answer not in ["y", "n"]:
-    #    answer = raw_input("OK to push to continue [Y/N]? ").lower()
-    #return answer == "y"
-    #while res:= input("Do you want to save? (Enter y/n)").lower() not in {"y", "n"}: pass
-    #if not input("Are you sure? (y/n): ").lower().strip()[:1] == "y": sys.exit(1)
-
-    #exit()
-
+    confirm() # prompt for execution
 
     for phone_num in phone_list:
         phone_num = phone_num.replace(" ", "")
@@ -70,7 +78,7 @@ def main(args):
             .create(
                 body=opts.body,
                 from_='+1##########', # your twilio number - this costs about $1/month
-                to='+1'+phone_num # +1 
+                to='+1'+phone_num     # +1 is the USA country code
             )
         print("phone_num = {0} ; body = \"{1}\" ; {2}".format(phone_num, opts.body, message.sid))
         #exit()
