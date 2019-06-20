@@ -31,7 +31,6 @@ def main(args):
     """
     This script is meant to be run from the cli
     """
-    # Get twilio account and auth info from config file
     file_name = '.twilio_config'
     account_sid = ''
     auth_token = ''
@@ -41,6 +40,7 @@ def main(args):
         print('{} file not found! Exiting.'.format(file_name))
         exit(2)
 
+    # Get twilio account and auth info from config file
     with open(file_name) as read_file:
         lines = read_file.read().strip().split('\n')
 
@@ -80,7 +80,6 @@ def main(args):
     if os.path.isfile(opts.list):
         with open(opts.list) as phone_file:
             for line in phone_file:
-                #print("line = {0}".format(line))
                 line = line.split('#', 1)[0]
                 line = re.sub('[-().+]', '', line)
                 if line:
@@ -97,20 +96,18 @@ def main(args):
         print('\nPhone List:')
         print(phone_list)
 
-    #exit()
-
     confirm() # prompt for execution
     print('')
 
     for phone_num in phone_list:
         phone_num = phone_num.replace(" ", "")
-        if phone_num.startswith("1"): # if phone_num starts with 1 remove it
+        if phone_num.startswith("1"): # If phone_num starts with 1 remove it
             phone_num = phone_num[1:]
         message = client.messages \
             .create(
                 body=opts.body,
-                from_='+13853360208', # your twilio number, costs about $1/month, each SMS $0.0075
-                to='+1'+phone_num     # +1 is the USA country code
+                from_='+13853360208', # Your twilio number. Costs about $1/month, $0.0075/SMS
+                to='+1'+phone_num     # +1 is the USA country code, adjust for your location
             )
         logging.info("phone_num = %s ; body = \"%s\" ; %s", phone_num, opts.body, message.sid)
         if opts.verbose:
