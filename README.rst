@@ -28,5 +28,5 @@ Usage::
 
 Examples::
 
-    twilio_sms.py -l phone_numbers.txt -b "Saturday at 9:30am.  Please come" -v
+    twilio_sms.py -l phone_numbers.txt -b "Saturday at 9:30am.  Please come"
     twilio_sms.py -l '123-456-7890 987-654-3210' -b "The Party is on!" -v
