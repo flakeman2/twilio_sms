@@ -12,6 +12,8 @@ and create a file named '.twilio_config' in the base of your cloned repo with th
 
     account_sid=##########
     auth_token=###########
+    twilio_num=###########
+    country_code=1       # 1 is the USA country code, adjust for your location
 
 Usage::
 
