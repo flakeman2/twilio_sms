@@ -31,33 +31,10 @@ def main(args):
     """
     This script is meant to be run from the cli
     """
-    file_name = '.twilio_config'
+    config_file = '.twilio_config'
     account_sid = ''
     auth_token = ''
     phone_list = []
-
-    if not os.path.exists(file_name):
-        print('{} file not found! Exiting.'.format(file_name))
-        exit(2)
-
-    # Get twilio account and auth info from config file
-    with open(file_name) as read_file:
-        lines = read_file.read().strip().split('\n')
-
-    for line in lines:
-        if 'account_sid' in line:
-            pieces = line.split('=')
-            account_sid = pieces[1]
-
-        if 'auth_token' in line:
-            pieces = line.split('=')
-            auth_token = pieces[1]
-
-    client = Client(account_sid, auth_token)
-
-    logging.basicConfig(filename='twilio_sms.log', filemode='a',\
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',\
-            datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
     cli = argparse.ArgumentParser(description="Send an SMS text using the Twilio API")
     cli.add_argument('-l', '--list', help="The phone number list can be a file (one per line) \
@@ -84,11 +61,44 @@ def main(args):
                 line = re.sub('[-().+]', '', line)
                 if line:
                     phone_list.append(line.strip())
-    else:
+    # this could be either one phone number or a bad path/file.
+    #elif len(re.sub('[-().+]', '', opts.list)) < 10:
+    elif opts.list.isnumeric():
         line = re.sub('[-().+]', '', opts.list)
         phone_list = line.split(' ')
+    else:
+        print("\nFile not found. Exiting.\n")
+        exit(2)
 
     phone_list = list(filter(None, phone_list))
+
+    if not os.path.exists(config_file):
+        print('{} file not found! Exiting.'.format(config_file))
+        exit(2)
+
+    # Get twilio account and auth info from config file
+    with open(config_file) as read_file:
+        lines = read_file.read().strip().split('\n')
+
+    for line in lines:
+        if 'account_sid' in line:
+            pieces = line.split('=')
+            account_sid = pieces[1]
+        if 'auth_token' in line:
+            pieces = line.split('=')
+            auth_token = pieces[1]
+        if 'twilio_num' in line:
+            pieces = line.split('=')
+            twilio_num = pieces[1]
+        if 'country_code' in line:
+            pieces = line.split('=')
+            country_code = pieces[1]
+
+    client = Client(account_sid, auth_token)
+
+    logging.basicConfig(filename='twilio_sms.log', filemode='a',\
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',\
+            datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
     if opts.verbose:
         print('\nMessage:')
@@ -106,8 +116,8 @@ def main(args):
         message = client.messages \
             .create(
                 body=opts.body,
-                from_='+13853360208', # Your twilio number. Costs about $1/month, $0.0075/SMS
-                to='+1'+phone_num     # +1 is the USA country code, adjust for your location
+                from_='+'+country_code+twilio_num, # Your twilio number. Costs about $1/month, $0.0075/SMS
+                to='+'+country_code+phone_num      # +1 is the USA country code, adjust for your location
             )
         logging.info("phone_num = %s ; body = \"%s\" ; %s", phone_num, opts.body, message.sid)
         if opts.verbose:
@@ -119,3 +129,4 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
+

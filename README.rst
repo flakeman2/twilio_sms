@@ -14,6 +14,7 @@ and create a file named '.twilio_config' in the base of your cloned repo with th
     auth_token=###########
 
 Usage::
+
     twilio_sms.py [-h] [-l LIST] [-b BODY] [-v]
     
     optional arguments:
