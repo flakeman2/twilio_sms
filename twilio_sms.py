@@ -38,8 +38,7 @@ def main(args):
 
     cli = argparse.ArgumentParser(description="Send an SMS text using the Twilio API")
     cli.add_argument('-l', '--list', help="The phone number list can be a file (one per line) \
-            or a list of phone numbers in quotes (must be space delimited, \
-            phone numbers themselves cannot have spaces).")
+            or a list of phone numbers (comma delimited).")
     cli.add_argument('-b', '--body', help="The body of the message you want to send in quotes. \
             Max 160 characters.")
     cli.add_argument('-v', '--verbose', action="store_true", help="Print more verbose output.")
@@ -50,30 +49,30 @@ def main(args):
         exit()
 
     if len(opts.body) > 160:
-        print("\nYour message is {0} characters, the max is 160, please fix.\
-                \nExiting.".format(len(opts.body)))
+        print(f"\nYour message is {len(opts.body)} characters, the max is 160, please fix.\nExiting.")
         exit(2)
 
     if os.path.isfile(opts.list):
         with open(opts.list) as phone_file:
             for line in phone_file:
+                line = line.replace(" ", "")
                 line = line.split('#', 1)[0]
                 line = re.sub('[-().+]', '', line)
                 if line:
                     phone_list.append(line.strip())
-    # this could be either one phone number or a bad path/file.
-    #elif len(re.sub('[-().+]', '', opts.list)) < 10:
-    elif opts.list.isnumeric():
-        line = re.sub('[-().+]', '', opts.list)
-        phone_list = line.split(' ')
     else:
-        print("\nFile not found. Exiting.\n")
+        line = opts.list.replace(" ", "")
+        line = re.sub('[-().+]', '', opts.list)
+        phone_list = line.split(',')
+
+    if not phone_list:
+        print("\nError parsing phone number list. Exiting.\n")
         exit(2)
 
     phone_list = list(filter(None, phone_list))
 
     if not os.path.exists(config_file):
-        print('{} file not found! Exiting.'.format(config_file))
+        print(f'{config_file} file not found! Exiting.')
         exit(2)
 
     # Get twilio account and auth info from config file
@@ -110,7 +109,6 @@ def main(args):
     print('')
 
     for phone_num in phone_list:
-        phone_num = phone_num.replace(" ", "")
         if phone_num.startswith("1"): # If phone_num starts with 1 remove it
             phone_num = phone_num[1:]
         message = client.messages \
@@ -119,9 +117,9 @@ def main(args):
                 from_='+'+country_code+twilio_num, # Your twilio number. Costs about $1/month, $0.0075/SMS
                 to='+'+country_code+phone_num      # +1 is the USA country code, adjust for your location
             )
-        logging.info("phone_num = %s ; body = \"%s\" ; %s", phone_num, opts.body, message.sid)
+        logging.info(f"phone_num = {phone_num} ; body = \"{opts.body}\" ; {message.sid}")
         if opts.verbose:
-            print("phone_num = {0} ; body = \"{1}\" ; {2}".format(phone_num, opts.body, message.sid))
+            print(f"phone_num = {phone_num} ; body = \"{opts.body}\" ; {message.sid}")
 
         #exit()
 
