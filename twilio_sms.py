@@ -102,8 +102,10 @@ def main(args):
     if opts.verbose:
         print('\nMessage:')
         print(opts.body)
+        print(f'\nMessage length: {len(opts.body)}')
         print('\nPhone List:')
         print(phone_list)
+        print(f'\nTotal numbers: {len(phone_list)}')
 
     confirm() # prompt for execution
     print('')
