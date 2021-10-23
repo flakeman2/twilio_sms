@@ -38,9 +38,9 @@ def main(args):
 
     cli = argparse.ArgumentParser(description="Send an SMS text using the Twilio API")
     cli.add_argument('-l', '--list', help="The phone number list can be a file (one per line) \
-            or a list of phone numbers (comma delimited).")
+            or a list of phone numbers (comma delimited).", required=True)
     cli.add_argument('-b', '--body', help="The body of the message you want to send in quotes. \
-            Max 160 characters.")
+            Max 160 characters.", required=True)
     cli.add_argument('-v', '--verbose', action="store_true", help="Print more verbose output.")
     opts = cli.parse_args(args)
 
